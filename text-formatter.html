@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+
+<style>
+  body {
+    background: #1a1a1a;
+    color: #fff;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+    padding: 2rem;
+    line-height: 1.5;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    background: linear-gradient(45deg, #ff4444, #44ff44);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-align: center;
+  }
+
+  .container {
+    background: #2a2a2a;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .input-group {
+    margin-bottom: 1.5rem;
+  }
+
+  label {
+    display: block;
+    font-size: 1rem;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+    color: #cccccc;
+  }
+
+  textarea {
+    background: #333;
+    color: #fff;
+    width: 100%;
+    min-height: 100px;
+    font-family: 'Fira Code', monospace;
+    padding: 1rem;
+    box-sizing: border-box;
+    border: 2px solid #444;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    line-height: 1.5;
+    resize: vertical;
+  }
+
+  textarea:focus {
+    outline: none;
+    border-color: #666;
+    box-shadow: 0 0 0 2px rgba(100, 100, 100, 0.3);
+  }
+
+  .buttons {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+  }
+
+  button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 6px;
+    font-family: inherit;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+  }
+
+  button:hover {
+    transform: translateY(-1px);
+  }
+
+  #btnWhite {
+    background: #fff;
+    color: #000;
+  }
+
+  #btnRed {
+    background: #ff4444;
+    color: #fff;
+  }
+
+  #btnGreen {
+    background: #44ff44;
+    color: #000;
+  }
+
+  #btnDefault {
+    background: #666;
+    color: #fff;
+  }
+
+  #btnResetAll {
+    background: #444;
+    color: #fff;
+  }
+
+  #btnCopy {
+    background: #555;
+    color: #fff;
+  }
+
+  button:hover {
+    filter: brightness(1.1);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+
+  .output-group {
+    margin-top: 2rem;
+  }
+
+  #numberBox, #coloredOutput {
+    display: none;
+  }
+
+  #formattedOutput {
+    background: #222;
+    border-color: #444;
+  }
+
+  .copy-group {
+    display: flex;
+    gap: 0.5rem;
+    align-items: start;
+  }
+
+  #farmOutput {
+    background: #222;
+    padding: 1rem;
+    border-radius: 8px;
+    font-family: 'Fira Code', monospace;
+    margin-top: 1.5rem;
+    line-height: 1.5;
+  }
+
+  #farmOutput span.red { color: #ff4444; }
+  #farmOutput span.green { color: #44ff44; }
+  #farmOutput span.white { color: #ffffff; }
+</style>
+</head>
+<body>
+
+<h1>Text Formatter</h1>
+
+<div class="container">
+  <div class="input-group">
+    <label>Input Text:</label>
+    <textarea id="inputText" placeholder="Type or paste your text here..."></textarea>
+  
+    <div class="buttons">
+      <button id="btnWhite">White</button>
+      <button id="btnRed">Red</button>
+      <button id="btnGreen">Green</button>
+      <button id="btnDefault">Default</button>
+      <button id="btnResetAll">Reset All</button>
+    </div>
+  </div>
+
+  <div id="numberBox" hidden></div>
+  <div id="coloredOutput" hidden></div>
+
+  <div class="output-group">
+    <label>Formatted Output:</label>
+    <div class="copy-group">
+      <textarea id="formattedOutput" readonly></textarea>
+      <button id="btnCopy">Copy</button>
+    </div>
+  </div>
+
+  <div class="output-group">
+    <label>Preview:</label>
+    <div id="farmOutput"></div>
+  </div>
+</div>
+
+<script>
+// [Previous JavaScript code remains exactly the same]
+const inputTextEl = document.getElementById('inputText');
+const numberBoxEl = document.getElementById('numberBox');
+const coloredOutputEl = document.getElementById('coloredOutput');
+const formattedOutputEl = document.getElementById('formattedOutput');
+const farmOutputEl = document.getElementById('farmOutput');
+
+const btnWhite = document.getElementById('btnWhite');
+const btnRed = document.getElementById('btnRed');
+const btnGreen = document.getElementById('btnGreen');
+const btnDefault = document.getElementById('btnDefault');
+const btnResetAll = document.getElementById('btnResetAll');
+const btnCopy = document.getElementById('btnCopy');
+
+let charValues = [];
+
+function resetCharValues() {
+  const text = inputTextEl.value;
+  charValues = new Array(text.length).fill(0);
+}
+
+// Initialization
+resetCharValues();
+recalcAll();
+
+inputTextEl.addEventListener('input', () => {
+  resetCharValues();
+  recalcAll();
+});
+
+btnWhite.addEventListener('click', () => applyValueToSelection(3));
+btnRed.addEventListener('click', () => applyValueToSelection(1));
+btnGreen.addEventListener('click', () => applyValueToSelection(2));
+btnDefault.addEventListener('click', () => applyValueToSelection(0));
+btnResetAll.addEventListener('click', () => {
+  resetCharValues();
+  recalcAll();
+});
+
+btnCopy.addEventListener('click', () => {
+  formattedOutputEl.select();
+  document.execCommand("copy");
+});
+
+function applyValueToSelection(val) {
+  const selectionStart = inputTextEl.selectionStart;
+  const selectionEnd = inputTextEl.selectionEnd;
+  if (selectionEnd > selectionStart) {
+    for (let i = selectionStart; i < selectionEnd; i++) {
+      charValues[i] = val;
+    }
+  }
+  recalcAll();
+}
+
+function recalcAll() {
+  const text = inputTextEl.value;
+  
+  numberBoxEl.value = charValues.join('');
+  coloredOutputEl.innerHTML = buildColoredOutput(text, charValues);
+  formattedOutputEl.value = buildFormattedOutput(text, charValues);
+  farmOutputEl.innerHTML = buildFarmOutput(formattedOutputEl.value);
+}
+
+function buildColoredOutput(text, values) {
+  let result = '';
+  let zeroColorToggle = true;
+  let lastNonSpaceType = null;
+  
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const val = values[i];
+    let spanClass;
+
+    if (val === 1) {
+      spanClass = 'red';
+      lastNonSpaceType = 1;
+    } else if (val === 2) {
+      spanClass = 'green';
+      lastNonSpaceType = 2;
+    } else if (val === 3) {
+      spanClass = 'white';
+      lastNonSpaceType = 3;
+    } else {
+      if (ch === ' ') {
+        spanClass = zeroColorToggle ? 'red' : 'green';
+      } else {
+        if (lastNonSpaceType === 1 || lastNonSpaceType === 2) {
+          zeroColorToggle = !zeroColorToggle;
+        }
+        spanClass = zeroColorToggle ? 'red' : 'green';
+        zeroColorToggle = !zeroColorToggle;
+        lastNonSpaceType = 0;
+      }
+    }
+
+    const safeChar = ch === ' ' ? '&nbsp;'
+                  : ch.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+    result += `<span class="${spanClass}">${safeChar}</span>`;
+  }
+
+  return result;
+}
+
+function buildFormattedOutput(text, values) {
+  const ZWJ = '\u200D';
+  let result = '';
+  
+  // First pass: Calculate natural alternation without any forced colors
+  let naturalColors = new Array(text.length).fill(0);
+  let colorToggle = true; // true = red, false = green
+  for (let i = 0; i < text.length; i++) {
+    if (text[i] !== ' ' && values[i] === 0) {
+      naturalColors[i] = colorToggle ? 1 : 2;
+      colorToggle = !colorToggle;
+    }
+  }
+
+  // Second pass: Build output with forced colors and ZWJs
+  colorToggle = true;
+  let forcedColorsSeen = 0;
+  
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    const val = values[i];
+    
+    // Handle white text
+    if (val === 3) {
+      result += `[[]]${ch}[[]]`;
+      continue;
+    }
+    
+    // Handle forced colors
+    if (val === 1 || val === 2) {
+      const currentNaturalColor = colorToggle ? 1 : 2;
+      const needsZWJ = val !== currentNaturalColor;
+      
+      if (needsZWJ) {
+        result += ZWJ;
+        colorToggle = !colorToggle;
+      }
+      
+      result += ch;
+      if (ch !== ' ') {
+        colorToggle = !colorToggle;
+        forcedColorsSeen++;
+      }
+      continue;
+    }
+    
+    // Handle default colors
+    result += ch;
+    if (ch !== ' ') {
+      colorToggle = !colorToggle;
+    }
+  }
+  
+  return result;
+}
+
+function buildFarmOutput(formattedText) {
+  const pattern = /\[\[\]\](.)\[\[\]\]/g;
+  let segments = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = pattern.exec(formattedText)) !== null) {
+    const before = formattedText.slice(lastIndex, match.index);
+    for (const c of before) {
+      segments.push({char: c, fromVal3: false});
+    }
+    const charInside = match[1];
+    segments.push({char: charInside, fromVal3: true});
+    lastIndex = pattern.lastIndex;
+  }
+
+  const after = formattedText.slice(lastIndex);
+  for (const c of after) {
+    segments.push({char: c, fromVal3: false});
+  }
+
+  let result = '';
+  let farmToggle = true;
+  for (let seg of segments) {
+    const ch = seg.char;
+    if (seg.fromVal3) {
+      result += `<span class="white">${escapeHtml(ch)}</span>`;
+    } else {
+      if (ch === ' ') {
+        result += `<span class="white">&nbsp;</span>`;
+      } else if (ch === '\u200D') {
+        result += `<span class="${farmToggle?'red':'green'}">${ch}</span>`;
+        farmToggle = !farmToggle;
+      } else {
+        result += `<span class="${farmToggle?'red':'green'}">${escapeHtml(ch)}</span>`;
+        farmToggle = !farmToggle;
+      }
+    }
+  }
+
+  return result;
+}
+
+function escapeHtml(ch) {
+  return ch
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;');
+}
+</script>
+
+</body>
+</html>
